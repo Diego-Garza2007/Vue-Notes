@@ -1,0 +1,9 @@
+/* Valores por defecto (modo claro) */
+:root {
+  --navbar-text: #1e1e1e;
+}
+
+/* Overrides para modo oscuro */
+:root[data-theme='dark'] {
+  --navbar-text: #ffffff;
+}
