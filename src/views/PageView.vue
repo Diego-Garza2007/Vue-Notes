@@ -41,7 +41,7 @@ const loadBoxes = () => {
       v-if="contextMenu.visible"
       :style="{ position: 'fixed', top: contextMenu.y + 'px', left: contextMenu.x + 'px', background: '#fff', border: '1px solid #ccc', padding: '6px', borderRadius: '4px', zIndex: 1000 }"
     >
-      <div @click="createNewBox" class="context__text">Crear nueva caja</div>
+      <div @click="createNewBox" style="color: black; cursor: pointer;">Crear nueva caja</div>
     </div>
 
     <TextModal ref="textModalRef" @update:modelValue="loadBoxes" />
