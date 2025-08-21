@@ -6,7 +6,6 @@ import Vue3DraggableResizable from 'vue3-draggable-resizable'
 
 // Emit para abrir modal en el padre
 const emit = defineEmits(['open-modal'])
-
 const boxes = ref([])
 
 const loadBoxes = async () => {
@@ -14,7 +13,6 @@ const loadBoxes = async () => {
   if (!user) return
   const uid = user.uid
   const snapshot = await getDocs(collection(db, "users", uid, "boxes"))
-  
   boxes.value = snapshot.docs.map(doc => {
     const data = doc.data()
     const box = {
@@ -26,38 +24,32 @@ const loadBoxes = async () => {
       w: data.w ?? 150,
       h: data.h ?? 100
     }
-
     console.log(`Caja cargada: id=${box.id}, x=${box.x}, y=${box.y}, w=${box.w}, h=${box.h}`)
-    
     return box
   })
 }
-
-
 
 onMounted(() => loadBoxes())
 
 // Guardar automáticamente cuando cambia posición o tamaño
 const updateBox = async (box) => {
-  await nextTick() 
+  await nextTick()
   const user = auth.currentUser
   if (!user) return
   const uid = user.uid
   const boxRef = doc(db, "users", uid, "boxes", String(box.id))
-
   try {
     await updateDoc(boxRef, {
-    x: box.x ?? 0,
-    y: box.y ?? 0,
-    w: box.w ?? 150,
-    h: box.h ?? 100
+      x: box.x ?? 0,
+      y: box.y ?? 0,
+      w: box.w ?? 150,
+      h: box.h ?? 100
     })
     console.log(`Caja ${box.id} actualizada`)
   } catch (err) {
     console.error("Error al actualizar caja", err)
   }
 }
-
 
 // Crear una nueva caja
 const createBox = async (x, y) => {
@@ -77,7 +69,7 @@ const createBox = async (x, y) => {
   boxes.value.push({ id: boxId, ...newBox })
 }
 
-// Abrir modal con botón "Editar"
+// Abrir modal con doble clic
 const openTextModal = (box) => {
   console.log('Abriendo modal para caja:', box)
   emit('open-modal', box)
@@ -87,6 +79,7 @@ defineExpose({
   createBox,
   loadBoxes
 })
+
 // Función para limpiar HTML
 const getTitle = (html, maxLength = 20) => {
   const tmp = document.createElement('div')
@@ -99,19 +92,19 @@ const getTitle = (html, maxLength = 20) => {
 <template>
   <div class="drag-area">
     <vue3-draggable-resizable
-  v-for="box in boxes"
-  :key="box.id"
-  :parent="true"
-  v-model:x="box.x"
-  v-model:y="box.y"
-  v-model:w="box.w"
-  v-model:h="box.h"
-  :initW="box.w" 
-  :initH="box.h"  
-  :minw="100"
-  :minh="100"
-  @drag-end="updateBox(box)"
-  @resize-end="updateBox(box)"
+      v-for="box in boxes"
+      :key="box.id"
+      :parent="true"
+      v-model:x="box.x"
+      v-model:y="box.y"
+      v-model:w="box.w"
+      v-model:h="box.h"
+      :initW="box.w"
+      :initH="box.h"
+      :minw="100"
+      :minh="100"
+      @drag-end="updateBox(box)"
+      @resize-end="updateBox(box)"
     >
       <div
         :style="{
@@ -123,15 +116,15 @@ const getTitle = (html, maxLength = 20) => {
           justifyContent:'center',
           alignItems:'center',
           color:'white',
-          padding:'4px'
+          padding:'4px',
+          cursor: 'pointer',
+          borderRadius: '5px'
         }"
+        @dblclick.stop="openTextModal(box)"
       >
-        <div style="flex:1; display:flex; justify-content:center; align-items:center; text-align:center;">
+        <div class="box-title">
           {{ getTitle(box.text, 30) }}
         </div>
-        <v-btn @click.stop="openTextModal(box)" color="info" small>
-          Editar
-        </v-btn>
       </div>
     </vue3-draggable-resizable>
   </div>
@@ -143,5 +136,14 @@ const getTitle = (html, maxLength = 20) => {
   width: 100%;
   height: 100vh;
   border: 2px dashed #ccc;
+}
+
+.box-title {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  user-select: none;
 }
 </style>
