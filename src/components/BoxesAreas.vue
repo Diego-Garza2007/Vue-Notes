@@ -1,11 +1,11 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
 import { auth, db } from '@/firebase'
-import { collection, doc, setDoc, getDocs, updateDoc } from 'firebase/firestore'
+import { collection, doc, setDoc, getDocs, updateDoc, deleteDoc } from 'firebase/firestore'
 import Vue3DraggableResizable from 'vue3-draggable-resizable'
 
-// Emit para abrir modal en el padre
-const emit = defineEmits(['open-modal'])
+// Emit para abrir modal en el padre y para el clic derecho en caja
+const emit = defineEmits(['open-modal', 'box-right-click'])
 const boxes = ref([])
 
 const loadBoxes = async () => {
@@ -69,15 +69,39 @@ const createBox = async (x, y) => {
   boxes.value.push({ id: boxId, ...newBox })
 }
 
+// Borrar una caja
+const deleteBox = async (boxId) => {
+  const user = auth.currentUser
+  if (!user) return
+  const uid = user.uid
+  
+  try {
+    // Eliminar de Firebase
+    await deleteDoc(doc(db, "users", uid, "boxes", String(boxId)))
+    
+    // Eliminar del array local
+    boxes.value = boxes.value.filter(box => box.id !== boxId)
+    console.log(`Caja ${boxId} eliminada`)
+  } catch (err) {
+    console.error("Error al eliminar caja", err)
+  }
+}
+
 // Abrir modal con doble clic
 const openTextModal = (box) => {
   console.log('Abriendo modal para caja:', box)
   emit('open-modal', box)
 }
 
+// Manejar clic derecho en caja
+const onBoxRightClick = (e, box) => {
+  emit('box-right-click', e, box)
+}
+
 defineExpose({
   createBox,
-  loadBoxes
+  loadBoxes,
+  deleteBox
 })
 
 // Función para limpiar HTML
@@ -117,10 +141,11 @@ const getTitle = (html, maxLength = 20) => {
           alignItems:'center',
           color:'white',
           padding:'4px',
-          cursor: 'pointer',
-          borderRadius: '5px'
+          borderRadius: '5px',
+          cursor: 'pointer'
         }"
         @dblclick.stop="openTextModal(box)"
+        @contextmenu.stop="onBoxRightClick($event, box)"
       >
         <div class="box-title">
           {{ getTitle(box.text, 30) }}

@@ -53,10 +53,8 @@ const openSettings = () => {
     link
     @click="openSettings"
   >
-    <v-list-item-icon>
-      <v-icon>mdi-cog</v-icon>
-    </v-list-item-icon>
-    <v-list-item-title>Settings</v-list-item-title>
+    <v-list-item-title>Settings<v-icon class="ml-1">mdi-cog</v-icon></v-list-item-title>
+    
   </v-list-item>
 </v-list>
 

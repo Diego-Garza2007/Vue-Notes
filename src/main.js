@@ -1,6 +1,7 @@
 import './assets/reset.css'
 import './assets/main.css'
 import './assets/theme.css'
+import '@mdi/font/css/materialdesignicons.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
