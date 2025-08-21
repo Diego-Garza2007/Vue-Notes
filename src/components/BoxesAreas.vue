@@ -104,12 +104,95 @@ defineExpose({
   deleteBox
 })
 
-// Función para limpiar HTML
-const getTitle = (html, maxLength = 20) => {
+const getTitleFirstParagraph = (quillHtml, maxLength = 30) => {
+  if (!quillHtml) return ''
+  
   const tmp = document.createElement('div')
-  tmp.innerHTML = html
-  const text = tmp.textContent || tmp.innerText || ''
-  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text
+  tmp.innerHTML = quillHtml
+  
+  // Find first non-empty paragraph
+  const paragraphs = tmp.querySelectorAll('p')
+  let firstParagraph = null
+  
+  for (let p of paragraphs) {
+    if (p.textContent.trim() !== '' && p.innerHTML.trim() !== '<br>') {
+      firstParagraph = p
+      break
+    }
+  }
+  
+  if (!firstParagraph) return ''
+  
+  const textLength = firstParagraph.textContent.trim().length
+  
+  if (textLength <= maxLength) {
+    return firstParagraph.outerHTML
+  }
+  
+  // Truncate within the paragraph
+  let currentLength = 0
+  let result = ''
+  let truncated = false
+  
+  const processNode = (node) => {
+    if (truncated) return
+    
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent
+      if (currentLength + text.length <= maxLength) {
+        result += text
+        currentLength += text.length
+      } else {
+        const remaining = maxLength - currentLength
+        const truncatedText = text.slice(0, remaining)
+        const lastSpace = truncatedText.lastIndexOf(' ')
+        
+        if (lastSpace > remaining * 0.6) {
+          result += truncatedText.slice(0, lastSpace) + '...'
+        } else {
+          result += truncatedText + '...'
+        }
+        truncated = true
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const tagName = node.tagName.toLowerCase()
+      
+      // Preserve formatting tags
+      const attributes = []
+      if (node.hasAttribute('style')) {
+        attributes.push(`style="${node.getAttribute('style')}"`)
+      }
+      
+      const attrString = attributes.length > 0 ? ' ' + attributes.join(' ') : ''
+      result += `<${tagName}${attrString}>`
+      
+      for (let child of node.childNodes) {
+        processNode(child)
+        if (truncated) break
+      }
+      
+      result += `</${tagName}>`
+    }
+  }
+  
+  // Build opening paragraph tag
+  const pAttributes = []
+  if (firstParagraph.hasAttribute('style')) {
+    pAttributes.push(`style="${firstParagraph.getAttribute('style')}"`)
+  }
+  const pAttrString = pAttributes.length > 0 ? ' ' + pAttributes.join(' ') : ''
+  
+  let finalResult = `<p${pAttrString}>`
+  
+  // Process paragraph content
+  for (let child of firstParagraph.childNodes) {
+    processNode(child)
+    if (truncated) break
+  }
+  
+  finalResult += result + '</p>'
+  
+  return finalResult.replace('<p></p>', '') // Remove if empty
 }
 </script>
 
@@ -147,9 +230,7 @@ const getTitle = (html, maxLength = 20) => {
         @dblclick.stop="openTextModal(box)"
         @contextmenu.stop="onBoxRightClick($event, box)"
       >
-        <div class="box-title">
-          {{ getTitle(box.text, 30) }}
-        </div>
+    <div class="box-title" v-html="getTitleFirstParagraph(box.text, 30)"></div>
       </div>
     </vue3-draggable-resizable>
   </div>
