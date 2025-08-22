@@ -23,6 +23,6 @@ Cualquier avance e idea es bienvenido
 # Instala dependencias
 npm install
 # En desarrollo con hot-reload
-npm run serve
+npm run dev
 # Compilar para producción
 npm run build
