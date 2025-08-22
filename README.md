@@ -1,29 +1,28 @@
-# Vue-Notes
+# Vue Notes
 
-This template should help get you started developing with Vue 3 in Vite.
+Una aplicación de notas creada con Vue.js que permite crear, editar, buscar y eliminar notas de forma sencilla.
 
-## Recommended IDE Setup
+## Como contribuir
+Puedes hacer un fork de este proyecto y si la pull request es estable hare el merge.
+Cualquier avance e idea es bienvenido
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Características principales
+- Crear nuevas notas con título y contenido.
+- Editar y eliminar notas existentes.
+- Almacenamiento con firebase.
 
-## Customize configuration
+## Tecnologías utilizadas
+- **Framework**: Vue.js (`versión 3.5.18`)
+- **Estilos**: (CSS puro / Vuetify )
+- **Deploy**: (Netlify)
+- **Librerias**: vue3-draggable-resizable & quill editor
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Instalación
 
-## Project Setup
-
-```sh
+```bash
+# Instala dependencias
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
+# En desarrollo con hot-reload
+npm run serve
+# Compilar para producción
 npm run build
-```
